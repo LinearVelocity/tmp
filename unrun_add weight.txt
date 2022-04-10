@@ -1,0 +1,131 @@
+import pandas as pd
+GD =  pd.read_csv('results/20220401.csv',encoding='utf-8')
+DLDJ =  pd.read_csv('road_rank.csv',encoding='utf-8')
+
+import geopandas as gpd
+roadfile='福田区疫情路网数据.shp'
+nodefile='nodes.shp'
+road_shp=gpd.GeoDataFrame.from_file(roadfile)
+node_shp=gpd.GeoDataFrame.from_file(nodefile,encoding='utf-8')
+ax=road_shp.plot(figsize=(100,100))
+road=road_shp[['u','v','key_value','osmid','oneway','ref','name','highway','road_lengt','from_start','to_end','lanes','bridge','maxspeed','access_val','width',
+              'service','tunnel','junction','OBJECTID','FID_福田区','distance','risk_value','FID_road','length','Shape_Leng','geometry']]
+DLDJ.rename(columns={'road_type': 'highway'}, inplace=True)
+t1=pd.merge(road,DLDJ,on=['highway'],how='left')
+
+#['trunk_link', 'primary']
+t1.loc[t1[t1['highway']=="['trunk_link', 'primary']"].index.tolist(),'w_rank']=1.5
+#t1[t1['highway']=="['trunk_link', 'primary']"]
+
+#"['service', 'unclassified']"
+t1.loc[t1[t1['highway']=="['service', 'unclassified']"].index.tolist(),'w_rank']=4
+# "['cycleway', 'footway']" 
+t1.loc[t1[t1['highway']=="['cycleway', 'footway']"].index.tolist(),'w_rank']=10
+# "['primary_link', 'primary']" 
+t1.loc[t1[t1['highway']=="['primary_link', 'primary']" ].index.tolist(),'w_rank']=2
+#"['trunk_link', 'tertiary']"
+t1.loc[t1[t1['highway']=="['trunk_link', 'tertiary']"].index.tolist(),'w_rank']=2.5
+#"['tertiary_link', 'tertiary']" 
+t1.loc[t1[t1['highway']=="['tertiary_link', 'tertiary']"].index.tolist(),'w_rank']=4
+#"['secondary', 'primary']" 
+t1.loc[t1[t1['highway']=="['secondary', 'primary']"].index.tolist(),'w_rank']=2.5
+#"['trunk_link', 'primary_link']" 
+t1.loc[t1[t1['highway']=="['trunk_link', 'primary_link']"].index.tolist(),'w_rank']=1.5
+#"['steps', 'footway']" 
+t1.loc[t1[t1['highway']=="['steps', 'footway']"].index.tolist(),'w_rank']=10
+#"['steps', 'tertiary']"
+t1.loc[t1[t1['highway']=="['steps', 'tertiary']"].index.tolist(),'w_rank']=7
+#"['tertiary', 'tertiary_link']" 
+t1.loc[t1[t1['highway']=="['tertiary', 'tertiary_link']"].index.tolist(),'w_rank']=4
+#"['footway', 'tertiary']"
+t1.loc[t1[t1['highway']=="['footway', 'tertiary']"].index.tolist(),'w_rank']=7
+#"['service', 'residential']" 
+t1.loc[t1[t1['highway']=="['service', 'residential']"].index.tolist(),'w_rank']=4
+#"['service', 'secondary']"
+t1.loc[t1[t1['highway']=="['service', 'secondary']"].index.tolist(),'w_rank']=3.5
+#"['tertiary', 'residential']" 
+t1.loc[t1[t1['highway']=="['tertiary', 'residential']"].index.tolist(),'w_rank']=4
+#"['footway', 'unclassified']"
+t1.loc[t1[t1['highway']=="['footway', 'unclassified']"].index.tolist(),'w_rank']=7
+#"['service', 'footway']" 
+t1.loc[t1[t1['highway']=="['service', 'footway']"].index.tolist(),'w_rank']=7
+#"['residential', 'path']"
+t1.loc[t1[t1['highway']=="['residential', 'path']"].index.tolist(),'w_rank']=4
+#"['residential', 'unclassified']" 
+t1.loc[t1[t1['highway']=="['residential', 'unclassified']"].index.tolist(),'w_rank']=4
+#"['steps', 'unclassified']"
+t1.loc[t1[t1['highway']=="['steps', 'unclassified']"].index.tolist(),'w_rank']=7
+#"['primary', 'motorway']" 
+t1.loc[t1[t1['highway']=="['primary', 'motorway']"].index.tolist(),'w_rank']=1.5
+#"['footway', 'path']"
+t1.loc[t1[t1['highway']=="['footway', 'path']"].index.tolist(),'w_rank']=7
+#"['secondary', 'secondary_link']" 
+t1.loc[t1[t1['highway']=="['secondary', 'secondary_link']"].index.tolist(),'w_rank']=3
+#"['primary_link', 'secondary']"
+t1.loc[t1[t1['highway']=="['primary_link', 'secondary']"].index.tolist(),'w_rank']=2.5
+#"['secondary', 'tertiary']" 
+t1.loc[t1[t1['highway']=="['secondary', 'tertiary']"].index.tolist(),'w_rank']=3.5
+#"['service', 'cycleway']"
+t1.loc[t1[t1['highway']=="['service', 'cycleway']"].index.tolist(),'w_rank']=7
+#"['footway', 'pedestrian']" 
+t1.loc[t1[t1['highway']=="['footway', 'pedestrian']" ].index.tolist(),'w_rank']=10
+#"['steps', 'residential']"
+t1.loc[t1[t1['highway']=="['steps', 'residential']"].index.tolist(),'w_rank']=7
+#"['motorway_link', 'secondary_link']" 
+t1.loc[t1[t1['highway']=="['motorway_link', 'secondary_link']"].index.tolist(),'w_rank']=2
+#"['steps', 'pedestrian']"
+t1.loc[t1[t1['highway']=="['steps', 'pedestrian']"].index.tolist(),'w_rank']=10
+#"['steps', 'path']" 
+t1.loc[t1[t1['highway']=="['steps', 'path']" ].index.tolist(),'w_rank']=7
+#"['unclassified', 'residential']"
+t1.loc[t1[t1['highway']=="['unclassified', 'residential']"].index.tolist(),'w_rank']=4
+#"['service', 'steps', 'footway']" 
+t1.loc[t1[t1['highway']=="['service', 'steps', 'footway']" ].index.tolist(),'w_rank']=8
+#"['service', 'steps']"
+t1.loc[t1[t1['highway']=="['service', 'steps']"].index.tolist(),'w_rank']=7
+#"['service', 'living_street']" 
+t1.loc[t1[t1['highway']=="['service', 'living_street']"].index.tolist(),'w_rank']=4
+#"['service', 'tertiary']"
+t1.loc[t1[t1['highway']=="['service', 'tertiary']"].index.tolist(),'w_rank']=4
+#"['secondary', 'primary_link']" 
+t1.loc[t1[t1['highway']=="['secondary', 'primary_link']"].index.tolist(),'w_rank']=2.5
+#"['primary_link', 'tertiary']"
+t1.loc[t1[t1['highway']=="['primary_link', 'tertiary']"].index.tolist(),'w_rank']=3
+#"['footway', 'living_street']" 
+t1.loc[t1[t1['highway']=="['footway', 'living_street']"].index.tolist(),'w_rank']=7
+#"['service', 'path']"
+t1.loc[t1[t1['highway']=="['service', 'path']"].index.tolist(),'w_rank']=4
+#"['unclassified', 'living_street']"
+t1.loc[t1[t1['highway']=="['unclassified', 'living_street']"].index.tolist(),'w_rank']=4
+
+GD.rename(columns={'osm_id': 'osmid'}, inplace=True)
+GD.rename(columns={'speed': 'realtime_speed'}, inplace=True)
+t1.rename(columns={'speed': 'ideal_speed'}, inplace=True)
+GD['osmid']=GD['osmid'].astype(str)
+GD['osmid']=GD['osmid'].astype(object)
+t2=pd.merge(t1,GD,on=['osmid'],how='left')
+t2['w_congestion'].fillna(0, inplace=True)
+
+#t2['weight_sum']=0.25*t2['road_lengt']+0.45*t2['risk_value']*t2['length']+0.1*t2['w_rank']+0.2*t2['w_congestion']
+t2['weight_sum'] = t2.apply(lambda x: x['road_lengt']*0.3 + x['risk_value']*1000*0.4+x['w_rank']*0.1+x['w_congestion']*0.2, axis=1)
+
+sum_weight = t2['weight_sum'].sum()
+t2['weight_21']=t2.apply(lambda x: x['weight_sum']/sum_weight, axis=1)
+
+#疫情风险归一化
+t2['w_risk']=t2.apply(lambda x:x['risk_value']*268,axis=1)
+tmp1=t2['w_risk'].sum()
+t2['w_risk_21']=t2.apply(lambda x:x['w_risk']/tmp1,axis=1)
+#路长归一化
+tmp2=t2['road_lengt'].sum()
+t2['w_len_21']=t2.apply(lambda x:x['road_lengt']/tmp2,axis=1)
+#道路等级归一化
+tmp3=t2['w_rank'].sum()
+t2['w_rank_21']=t2.apply(lambda x:x['w_rank']/tmp3,axis=1)
+#拥堵指数归一化
+tmp4=t2['w_congesti'].sum()
+t2['w_congesti_21']=t2.apply(lambda x:x['w_congesti']/tmp4,axis=1)
+#weight_all
+t2['weight_all'] = t2.apply(lambda x: x['w_len_21']*0.25 + x['w_risk_21']*0.5+x['w_rank_21']*0.1+x['w_congesti_21']*0.15, axis=1)
+t2['w_21']=t2.apply(lambda x:x['weight_all']*1000000,axis=1)
+t2.to_file('results/weighted_road.shp', driver='ESRI Shapefile',encoding='utf-8')

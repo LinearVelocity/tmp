@@ -1,0 +1,30 @@
+GD =  pd.read_csv("20220401GD.csv")
+GD['road_name']='深圳市'+GD['road_name']
+
+#geocoding by Nominatim
+from geopy.geocoders import Nominatim
+import time
+geolocator=Nominatim(user_agent='BuyiXiao')
+#address=["深圳市平吉大道"]
+address=GD['road_name']
+tmp=[]
+for ad in address:
+    location = geolocator.geocode(ad,timeout=10)
+    #print(location.address)
+    #print(location.latitude, location.longitude)
+    #print(location.raw)
+    tmp.append(location.raw)
+    time.sleep(5)
+
+#add weight
+import pandas as pd
+df=pd.DataFrame(tmp)
+df['road_name']=df['display_name'].map(lambda x:x.split(',')[0])
+df['distinction']=df['display_name'].map(lambda x:x.split(',')[2])
+df1=df[['road_name','distinction','osm_type','osm_id','lat','lon','display_name','class','type']]
+df1['road_name']='深圳市'+df1['road_name']
+df1.loc[7,'road_name']='深圳市同乐路'
+df2=pd.merge(df1,GD,on=['road_name'],how='left')
+#w_congestion=congestion_index*(0.5*travel_time+0.5*delay_time)
+df2['w_congestion']=df2['congestion_index']*(0.5*df2['travel_time']+0.5*df2['delay_time'])
+df2.to_csv('results/20220401.csv',index=False,header=True,encoding='utf-8')

@@ -1,0 +1,60 @@
+import requests
+from urllib.parse import urlencode
+from pyquery import PyQuery as pq
+import json
+import csv
+import time
+def get_page(roadType):
+    base_url = 'https://report.amap.com/ajax/roadRank.do?'
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+        'referer': 'https://report.amap.com/detail.do?city=610100',
+        'x-requested-with': 'XMLHttpRequest',
+
+    }
+    params = {
+        'roadType': roadType,
+        'timeType': '0',
+        'cityCode': '440300',
+    }
+    url = base_url + urlencode(params)
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            return response.json()
+    except requests.ConnectionError as e:
+        print('Error', e.args)
+
+def write_to_file(content):
+    with open('实时拥堵指数.csv','a',newline='') as csvfile:
+        fieldnames = ['name','localtime','dir','id','length','number','index','speed','travelTime','delayTime']
+        writer = csv.DictWriter(csvfile,fieldnames = fieldnames)
+        writer.writerow(content)
+def parse_page(html):
+    items = html.get('tableData')
+    for item in items:
+        luduan = {}
+        luduan['name'] = item.get('name')
+        luduan['localtime'] = time.strftime('%Y-%m-%d,%H:%M:%S',time.localtime(time.time()))
+        luduan['dir'] = item.get('dir')
+        luduan['id'] = item.get('id')
+        luduan['length'] = item.get('length')
+        luduan['number'] = item.get('number')
+        luduan['index'] = item.get('index')
+        luduan['speed'] = item.get('speed')
+        luduan['travelTime'] = item.get('travelTime')
+        luduan['delayTime'] = item.get('delayTime')
+        write_to_file(luduan)
+        yield luduan
+
+
+while True:
+    for i in {0,1}:
+        print(i)
+        roadType = i
+        if __name__ == '__main__':
+            html = get_page(roadType)
+            results = parse_page(html)
+            print(list(results))
+        print("************************************************************")
+    time.sleep(300)
